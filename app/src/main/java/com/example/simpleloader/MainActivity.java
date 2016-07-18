@@ -20,7 +20,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.Date;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MainActivity extends AppCompatActivity  {
 
     private static final String TAG = "MainActivityTAG_";
 
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             //printCallLog();
         }
 
-        getSupportLoaderManager().initLoader(LIST_ID, null, this);
+        //getSupportLoaderManager().initLoader(LIST_ID, null, this);
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -65,7 +65,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d(TAG, "onRequestPermissionsResult: Good to go!");
                     //printCallLog();
-                    getSupportLoaderManager().initLoader(LIST_ID, null, this);
+                    //getSupportLoaderManager().initLoader(LIST_ID, null, this);
+                    doMagic();
                 } else {
                     Log.d(TAG, "onRequestPermissionsResult: Bad user");
                 }
@@ -73,33 +74,25 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getApplicationContext(),
-                Uri.parse(SMS_CONTENT_URI),
-                null,
-                null,
-                null,
-                null);
-    }
+    public void doMagic() {
 
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        //parse the URI
+        Uri uri = Uri.parse(SMS_CONTENT_URI);   // static method
+
+        // https://developer.android.com/guide/topics/providers/content-provider-basics.html
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+
         if (cursor != null && cursor.getCount() > 0) {
             cursor.moveToFirst();
+
             do {
-                final String messageBody = cursor.getString(cursor.getColumnIndex("body"));
-                final String messageAddress = cursor.getString(cursor.getColumnIndex("address"));
-                Log.d(TAG, "onLoadFinished: " + messageAddress + " " + messageBody);
+                Log.d(TAG, "doMagic: " + cursor.getString(cursor.getColumnIndex("body")));
+                Log.d(TAG, "doMagic: " + cursor.getString(cursor.getColumnIndex("address")));
             } while (cursor.moveToNext());
+
+            cursor.close();
         }
     }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        Log.d(TAG, "onLoaderReset: ");
-    }
-
 
 
     @Override
